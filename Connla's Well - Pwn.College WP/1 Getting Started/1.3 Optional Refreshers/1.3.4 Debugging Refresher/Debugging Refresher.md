@@ -76,3 +76,21 @@
 > a good internal understanding of these commands. The commands are all absolutely critical to navigating a program's
 > execution.
 
+
+
+# 5
+
+
+
+# 6
+
+
+
+# 7
+
+
+
+# 8
+
+
+
