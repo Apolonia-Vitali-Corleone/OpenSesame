@@ -1,80 +1,127 @@
-# 3
+# 1
 
-> ###
-> ### Welcome to /challenge/embryogdb_level3!
-> ###
+没有任何难度，运行程序，c，就有flag
+
+
+
+一些记录下来的指令
+
+```sh
+start直接下断点到main
+starti直接断点到_start
+start <ARGV1> <ARGV2> <ARGVN> < <STDIN_PATH>
+attach <PID>
+
+这一句没咋搞懂
+You can use the command
+`core <PATH>` to analyze the coredump of an already run program.
+```
+
+
+
+# 2
+
+查看一下寄存器的值，然后填进去
+
+
+
+> `x/<n><u><f> <address>` ，x：examine
 >
-> GDB is a very powerful dynamic analysis tool which you can use in order to understand the state of a program throughout
-> its execution. You will become familiar with some of gdb's capabilities in this module.
+> `x` 命令用于**检查内存**，它从指定的 `<address>` 开始，显示内存中的数据。后面的格式控制符控制输出的显示格式：
 >
-> You can examine the contents of memory using the `x/<n><u><f> <address>` parameterized command. 
+> `p/<n><u><f> <address>` ，p：print
 >
-> In this format
-
-第一个，数字，查看的个数
-
-第二个，b,h,w,g查看几个字节
-
-第三个，格式，这些字节用什么格式解析，d，十进制，x，十六进制，s，字符串，i指令
-
+> 在我看来p是一个傻逼command
+>
+> 我错了，这玩意儿就看看寄存器算了
+>
+> 内存都用x，寄存器用p
+>
+> **`p` 更适合打印变量、表达式和寄存器的值**，尤其是在查看高级数据结构（如 C++ 对象、结构体）时，它可以自动解析类型和打印详细信息。
+>
+> **`x` 更适合查看内存的原始内容**，尤其在需要精确控制内存大小、格式和数量时，`x` 更加灵活和强大。
+>
+> 
+>
 > `<u>` is the unit size to display, 
 >
 > `<f>` is the format to display it in, and 
 >
 > `<n>` is the number of elements to display. 
 >
-> Valid unit sizes are `b` (1 byte), `h` (2 bytes), `w` (4 bytes), and `g` (8 bytes). 
+> - `<n>`：要显示的内存单元个数，默认为 1。例如，`x/4xw` 会显示 4 个单位的内存。
+> - `<u>`：单位大小，表示读取的内存数据块大小：
+>   - `b`：1 字节 (byte)
+>   - `h`：2 字节 (halfword, 16-bit)
+>   - `w`：4 字节 (word, 32-bit)
+>   - `g`：8 字节 (giant word, 64-bit)
+> - `<f>`：格式，用来控制数据的显示方式：
+>   - `x`：以十六进制显示 (hexadecimal)
+>   - `d`：以十进制显示 (decimal)
+>   - `u`：以无符号十进制显示 (unsigned decimal)
+>   - `t`：以二进制显示 (binary)
+>   - `o`：以八进制显示 (octal)
+>   - `c`：显示字符 (character)
+>   - `f`：显示浮点数 (floating point)
+>   - `s` (string) and 
+>   - `i` (instruction)
 >
-> Valid formats are `d` (decimal), `x` (hexadecimal), `s` (string) and `i` (instruction).
+> `p` 命令的作用是打印表达式或变量的值，它只对单个值进行操作，不允许你像 `x` 命令一样指定多个值的数量。
 >
-> The address can be specified using a register name, symbol name, or
-> absolute address. Additionally, you can supply mathematical expressions when specifying the address.
+> 而 `x` 命令允许你指定显示的元素个数，例如 `x/4xw $r12` 会显示 4 个内存单元。
+
+
+
+以上内容都是引用的，自己看看那些需要。
+
+注意，对于p指令来讲，只有f有用。
+
+n只会是1，然后u的话是meaningless，只有f有用
+
+# 3
+
+他妈了个巴子的不给提示，谁知道你踏马对比的random是哪里的值
+
+看了看汇编才发现是$rbp-0x10和$rbp-0x18
+
+我真草拟吗
+
+> (gdb) p/x *0x5788d8382c1f $2 = 0xe445c790 (gdb) p/d 0x5788d8382c1f $3 = 96245254728735    有啥区别
 >
-> For example, `x/8i $rip` will print the next 8 instructions from the current instruction pointer. `x/16i main` will
-> print the first 16 instructions of main. You can also use `disassemble main`, or `disas main` for short, to print all of
-> the instructions of main. Alternatively, `x/16gx $rsp` will print the first 16 values on the stack. `x/gx $rbp-0x32`
-> will print the local variable stored there on the stack.
+> 
 >
-> You will probably want to view your instructions using the CORRECT assembly syntax. You can do that with the command
-> `set disassembly-flavor intel`.
+> ###### ChatGPT said:
 >
-> In order to solve this level, you must figure out the random value on the stack (the value read in from `/dev/urandom`).
-> Think about what the arguments to the read system call are.
+> ChatGPT
+>
+> 这两个 GDB 命令的区别在于打印值的 **格式** 和 **解释方式**：
+>
+> ### 1. **`p/x \*0x5788d8382c1f`**：
+>
+> - `p/x`：打印**十六进制**格式的值。
+> - `*0x5788d8382c1f`：这里的 `*` 代表解引用操作，意思是查看地址 `0x5788d8382c1f` 处的**内存内容**。
+> - **输出**：`$2 = 0xe445c790`，表示在地址 `0x5788d8382c1f` 处的内存值为 `0xe445c790`，以十六进制格式显示。
+>
+> ### 2. **`p/d 0x5788d8382c1f`**：
+>
+> - `p/d`：打印**十进制**格式的值。
+> - `0x5788d8382c1f`：这里没有使用 `*`，意味着它打印的是**该地址值**本身，而不是该地址处的内存内容。
+> - **输出**：`$3 = 96245254728735`，表示地址 `0x5788d8382c1f` 的十进制数值是 `96245254728735`。
+>
+> ### 总结：
+>
+> - `p/x *0x5788d8382c1f` 访问并打印地址 `0x5788d8382c1f` 处的内存内容，以十六进制格式输出。
+> - `p/d 0x5788d8382c1f` 打印地址 `0x5788d8382c1f` 的十进制表示，**不是内存内容**，而是地址的数值本身。
+
+我日你妈
 
 
 
 # 4
 
-> ###
-> ### Welcome to /challenge/embryogdb_level4!
-> ###
->
-> GDB is a very powerful dynamic analysis tool which you can use in order to understand the state of a program throughout
-> its execution. You will become familiar with some of gdb's capabilities in this module.
->
-> A critical part of dynamic analysis is getting your program to the state you are interested in analyzing. So far, these
-> challenges have automatically set breakpoints for you to pause execution at states you may be interested in analyzing.
-> It is important to be able to do this yourself.
->
-> There are a number of ways to move forward in the program's execution. You can use the `stepi <n>` command, or `si <n>`
-> for short, in order to step forward one instruction. You can use the `nexti <n>` command, or `ni <n>` for short, in
-> order to step forward one instruction, while stepping over any function calls. The `<n>` parameter is optional, but
-> allows you to perform multiple steps at once. You can use the `finish` command in order to finish the currently
-> executing function. You can use the `break *<address>` parameterized command in order to set a breakpoint at the
-> specified-address. You have already used the `continue` command, which will continue execution until the program hits a
-> breakpoint.
->
-> While stepping through a program, you may find it useful to have some values displayed to you at all times. There are
-> multiple ways to do this. The simplest way is to use the `display/<n><u><f>` parameterized command, which follows
-> exactly the same format as the `x/<n><u><f>` parameterized command. For example, `display/8i $rip` will always show you
-> the next 8 instructions. On the other hand, `display/4gx $rsp` will always show you the first 4 values on the stack.
-> Another option is to use the `layout regs` command. This will put gdb into its TUI mode and show you the contents of all
-> of the registers, as well as nearby instructions.
->
-> In order to solve this level, you must figure out a series of random values which will be placed on the stack. You are
-> highly encouraged to try using combinations of `stepi`, `nexti`, `break`, `continue`, and `finish` to make sure you have
-> a good internal understanding of these commands. The commands are all absolutely critical to navigating a program's
-> execution.
+
+
+
 
 
 

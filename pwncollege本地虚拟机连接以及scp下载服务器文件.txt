@@ -1,0 +1,46 @@
+ssh-keygen -f key -N ''
+这个指令，生成  公钥和私钥
+key,私钥
+key.pub 公钥
+
+key.pub 公钥，全部复制
+
+settings 下面的sshkey，粘贴进去
+提交成功
+
+回到虚拟机
+
+ssh -i key hacker@dojo.pwn.college
+第二个指令。
+注意，这个指令的终端要和key在同一个目录
+
+The authenticity of host 'dojo.pwn.college (206.206.192.59)' can't be established.
+ED25519 key fingerprint is SHA256:B31DzslH7ThPQFDntu6WpMf0q+YmRG4i6qamH/zkz1A.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added 'dojo.pwn.college' (ED25519) to the list of known hosts.
+No active challenge session; start a challenge!
+Connection to dojo.pwn.college closed.
+连接成功，不过我没有开启题目，所以没有让我连接。
+
+现在我开启一个题目
+gao@gao-jammy:~/Desktop/pwncollege$ ssh -i key hacker@dojo.pwn.college
+Connected!                                                                        
+hacker@reverse-engineering-level-3-0:~$ 
+
+连接成功
+
+有时候服务器很卡
+这时候可以把文件下载下来到本地
+这就要用到scp指令了。
+
+我连接失败了，看来scp我不是很熟悉。
+再试一次
+
+应该是会要求输入私钥的
+传输成功了
+scp -i key hacker@dojo.pwn.college:/challenge/babyrev_level3.0 ./
+这个指令我就不多说了，-i key输入私钥，/challenge/babyrev_level3.0文件，./当前目录
+
+尤其是re的题目，用浏览器看ida非常卡，最好下载下来再做。
+
